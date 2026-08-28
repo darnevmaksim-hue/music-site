@@ -54,8 +54,8 @@ function makeCard(t) {
   const img = document.createElement('img');
   img.className = 'art';
   img.loading = 'lazy';
-  img.src = t.albumImage ? './' + t.albumImage : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-  img.onerror = () => { img.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; };
+  img.src = t.albumImage && t.albumImage.indexOf('scdn.co') === -1 ? './' + t.albumImage : 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%23222%22/%3E%3Ctext x=%22100%22 y=%22115%22 font-size=%2260%22 text-anchor=%22middle%22 fill=%22%23666%22%3E%F0%9F%8E%B5%3C/text%3E%3C/svg%3E';
+  img.onerror = () => { img.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%23222%22/%3E%3Ctext x=%22100%22 y=%22115%22 font-size=%2260%22 text-anchor=%22middle%22 fill=%22%23666%22%3E%F0%9F%8E%B5%3C/text%3E%3C/svg%3E'; };
   const badge = document.createElement('span');
   badge.className = 'playBadge';
   badge.textContent = '▶';
