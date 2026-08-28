@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Моя библиотека</title>
+  <title>Моя музыкальная библиотека</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
 </head>
 <body>
   <header>
-    <h1>Моя музыкальная библиотека</h1>
+    <div class="headTop">
+      <h1>Моя музыкальная библиотека</h1>
+      <span class="total">🎵 <span id="cardCount">0</span> треков</span>
+    </div>
     <div class="controls">
       <input type="search" id="search" placeholder="Поиск по названию, исполнителю, альбому...">
       <select id="sourceFilter">
@@ -21,11 +25,20 @@
   <main id="grid"></main>
 
   <div id="playerBar" class="hidden">
-    <div id="playerWrap"></div>
     <div id="playerInfo">
-      <span id="nowPlaying"></span>
-      <button id="closePlayer">✕</button>
+      <div id="nowWrap">
+        <span id="nowTitle"></span>
+        <span id="nowArtist"></span>
+      </div>
+      <div id="playerControls">
+        <button id="btnShuffle" title="Перемешать">🔀</button>
+        <button id="btnPrev" title="Предыдущий">⏮</button>
+        <button id="btnPlay" title="Play/Pause">▶</button>
+        <button id="btnNext" title="Следующий">⏭</button>
+      </div>
     </div>
+    <div id="playerWrap"></div>
+    <button id="closePlayer" title="Закрыть">✕</button>
   </div>
 
   <script src="app.js"></script>
