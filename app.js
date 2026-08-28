@@ -4,7 +4,6 @@ const sourceFilter = document.getElementById('sourceFilter');
 const counter = document.getElementById('counter');
 const cardCount = document.getElementById('cardCount');
 const playerBar = document.getElementById('playerBar');
-const playerWrap = document.getElementById('playerWrap');
 const nowTitle = document.getElementById('nowTitle');
 const nowArtist = document.getElementById('nowArtist');
 const btnPrev = document.getElementById('btnPrev');
@@ -16,9 +15,10 @@ const btnClose = document.getElementById('closePlayer');
 let tracks = [];
 let queue = [];
 let queueIndex = -1;
-let playing = false;
 let shuffle = false;
-let autoTimer = null;
+
+const audio = new Audio();
+audio.preload = 'auto';
 
 async function loadTracks() {
   const res = await fetch('tracks.json');
@@ -44,155 +44,134 @@ function visible() {
   });
 }
 
-function render() {
-  const list = visible();
-  counter.textContent = `РџРѕРєР°Р·Р°РЅРѕ: ${list.length} РёР· ${tracks.length}`;
-  cardCount.textContent = `${tracks.length}`;
-  grid.innerHTML = '';
-  list.forEach(t => grid.appendChild(makeCard(t)));
-}
-
-function coverEl(t) {
-  const img = document.createElement('img');
-  img.className = 'art';
-  img.src = t.albumImage ? './' + t.albumImage : '';
-  img.alt = '';
-  img.loading = 'lazy';
-  img.onerror = () => { img.style.visibility = 'hidden'; };
-  return img;
-}
-
 function makeCard(t) {
   const card = document.createElement('div');
-  card.className = 'card';
+  card.className = 'card' + (t.previewUrl ? ' playable' : '');
+  card.dataset.id = t.id;
 
-  const imgWrap = document.createElement('div');
-  imgWrap.className = 'artWrap';
-  imgWrap.appendChild(coverEl(t));
-  const playBadge = document.createElement('div');
-  playBadge.className = 'playBadge';
-  playBadge.textContent = 'в–¶';
-  imgWrap.appendChild(playBadge);
+  const artWrap = document.createElement('div');
+  artWrap.className = 'artWrap';
+  const img = document.createElement('img');
+  img.className = 'art';
+  img.loading = 'lazy';
+  img.src = t.albumImage ? './' + t.albumImage : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+  img.onerror = () => { img.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; };
+  const badge = document.createElement('span');
+  badge.className = 'playBadge';
+  badge.textContent = '▶';
+  artWrap.appendChild(img);
+  artWrap.appendChild(badge);
+  card.appendChild(artWrap);
 
   const name = document.createElement('div');
   name.className = 'name';
   name.textContent = t.name;
   name.title = t.name;
+  card.appendChild(name);
 
   const artist = document.createElement('div');
   artist.className = 'artist';
-  artist.textContent = t.artists;
+  artist.textContent = t.artists || '';
   artist.title = t.artists;
+  card.appendChild(artist);
 
-  card.append(imgWrap, name, artist);
-  card.classList.add('playable');
-  card.addEventListener('click', () => playFrom(t));
+  if (t.previewUrl) {
+    card.addEventListener('click', () => playAt(t));
+  }
   return card;
 }
 
-function playFrom(t) {
+function render() {
   const list = visible();
-  queue = list;
-  const idx = queue.findIndex(x => x.id === t.id);
-  queueIndex = idx >= 0 ? idx : 0;
-  playTrack();
+  counter.textContent = `Показано: ${list.length} из ${tracks.length}`;
+  cardCount.textContent = `${tracks.length}`;
+  grid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(t => frag.appendChild(makeCard(t)));
+  grid.appendChild(frag);
 }
 
-function current() {
-  if (!queue.length) return null;
-  return queue[queueIndex];
+function highlight() {
+  document.querySelectorAll('.card').forEach(c => {
+    c.classList.toggle('active', c.dataset.id === (queue[queueIndex] || {}).id);
+  });
 }
 
-function playTrack() {
-  const t = current();
-  if (!t) return;
+function playAt(t) {
+  queue = visible().filter(x => x.previewUrl);
+  queueIndex = queue.findIndex(x => x.id === t.id);
+  playCurrent();
+}
+
+function playCurrent() {
+  if (queueIndex < 0 || queueIndex >= queue.length) return;
+  const t = queue[queueIndex];
+  nowTitle.textContent = t.name || '';
+  nowArtist.textContent = (t.artists || '') + (t.album ? ' — ' + t.album : '');
   playerBar.classList.remove('hidden');
-  playerWrap.innerHTML = '';
-  const iframe = document.createElement('iframe');
-  iframe.src = 'https://open.spotify.com/embed/track/' + t.id + '?utm_source=generator&theme=0';
-  iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-  iframe.loading = 'lazy';
-  playerWrap.appendChild(iframe);
-  nowTitle.textContent = t.name;
-  nowArtist.textContent = t.artists;
-  nowTitle.title = t.name;
-  nowArtist.title = t.artists;
-  playing = true;
-  btnPlay.textContent = 'вќљвќљ';
-  highlightCard();
-  stopAuto();
-  autoTimer = setTimeout(stepNext, 28000);
+  audio.src = t.previewUrl;
+  audio.play().catch(() => {});
+  btnPlay.textContent = '❚❚';
+  highlight();
 }
 
-function stepNext() {
-  if (queue.length === 0) return;
-  if (shuffle && queue.length > 1) {
-    let n = queueIndex;
-    while (n === queueIndex) n = Math.floor(Math.random() * queue.length);
-    queueIndex = n;
+audio.addEventListener('ended', () => {
+  btnNext.click();
+});
+
+audio.addEventListener('play', () => { btnPlay.textContent = '❚❚'; });
+audio.addEventListener('pause', () => { btnPlay.textContent = '▶'; });
+
+btnPlay.addEventListener('click', () => {
+  if (queueIndex < 0) {
+    const list = visible().filter(x => x.previewUrl);
+    if (list.length) playAt(list[Math.floor(Math.random() * list.length)]);
+    return;
+  }
+  if (audio.paused) audio.play().catch(() => {});
+  else audio.pause();
+});
+
+btnNext.addEventListener('click', () => {
+  if (queue.length === 0) {
+    const list = visible().filter(x => x.previewUrl);
+    if (list.length) playAt(list[0]);
+    return;
+  }
+  if (shuffle) {
+    queueIndex = Math.floor(Math.random() * queue.length);
   } else {
     queueIndex = (queueIndex + 1) % queue.length;
   }
-  playTrack();
-}
+  playCurrent();
+});
 
-function prevTrack() {
-  if (!queue.length) return;
+btnPrev.addEventListener('click', () => {
+  if (queue.length === 0) return;
+  if (audio.currentTime > 3) { audio.currentTime = 0; return; }
   queueIndex = (queueIndex - 1 + queue.length) % queue.length;
-  playTrack();
-}
+  playCurrent();
+});
 
-function togglePlay() {
-  if (!queue.length) return;
-  if (playing) {
-    playing = false;
-    btnPlay.textContent = 'в–¶';
-    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
-  } else {
-    playing = true;
-    btnPlay.textContent = 'вќљвќљ';
-    autoTimer = setTimeout(stepNext, 28000);
-  }
-  const t = current();
-  if (t) openEmbedLazy();
-}
-
-function openEmbedLazy() {
-  // РџСЂРё РїР°СѓР·Рµ/РІРѕР·РѕР±РЅРѕРІР»РµРЅРёРё РїРµСЂРµР·Р°РіСЂСѓР¶Р°РµРј embed, С‡С‚РѕР±С‹ РѕРЅ РЅР°С‡Р°Р» РёР·-Р·Р° autoplay (РёРЅР°С‡Рµ РЅРµ РїРµСЂРµРёРіСЂР°РµС‚)
-  const iframe = playerWrap.querySelector('iframe');
-  if (iframe) {
-    iframe.src = iframe.src.split('&autoplay')[0] + (playing ? '&autoplay=1' : '');
-  }
-}
-
-function highlightCard() {
-  [...grid.children].forEach(c => c.classList.remove('active'));
-  const t = current();
-  if (!t) return;
-  const card = [...grid.children].find(c => {
-    const n = c.querySelector('.name');
-    return n && n.textContent === t.name;
-  });
-  if (card) card.classList.add('active');
-}
-
-function stopAuto() { if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; } }
-
-btnNext.addEventListener('click', () => { stopAuto(); stepNext(); });
-btnPrev.addEventListener('click', prevTrack);
-btnPlay.addEventListener('click', togglePlay);
 btnShuffle.addEventListener('click', () => {
   shuffle = !shuffle;
   btnShuffle.classList.toggle('on', shuffle);
 });
+
 btnClose.addEventListener('click', () => {
-  playerWrap.innerHTML = '';
+  audio.pause();
+  audio.removeAttribute('src');
   playerBar.classList.add('hidden');
-  playing = false;
-  stopAuto();
+  highlight();
 });
 
-search.addEventListener('input', render);
-sourceFilter.addEventListener('change', render);
+search.addEventListener('input', () => {
+  queueIndex = -1;
+  render();
+});
+sourceFilter.addEventListener('change', () => {
+  queueIndex = -1;
+  render();
+});
 
 loadTracks();
