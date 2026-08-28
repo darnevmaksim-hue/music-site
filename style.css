@@ -1,0 +1,114 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: #121212;
+  color: #fff;
+  min-height: 100vh;
+}
+
+header {
+  padding: 24px;
+  position: sticky;
+  top: 0;
+  background: #121212ee;
+  backdrop-filter: blur(6px);
+  z-index: 5;
+  border-bottom: 1px solid #222;
+}
+
+h1 { font-size: 22px; margin-bottom: 14px; }
+
+.controls { display: flex; gap: 10px; flex-wrap: wrap; }
+
+input[type=search], select {
+  background: #242424;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+input[type=search] { flex: 1; min-width: 220px; }
+
+#counter { color: #999; font-size: 13px; margin-top: 10px; }
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+  padding: 24px;
+}
+
+.card {
+  background: #181818;
+  border-radius: 10px;
+  padding: 12px;
+  transition: background .2s;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+}
+.card:hover { background: #282828; }
+.card.playable { cursor: pointer; }
+
+.artWrap { position: relative; margin-bottom: 10px; }
+.art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #333;
+  display: block;
+}
+.playBadge {
+  position: absolute;
+  right: 8px; bottom: 8px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #1db954;
+  color: #000;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  transform: translateY(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.5);
+}
+.card:hover .playBadge { opacity: 1; transform: translateY(0); }
+
+.name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.artist { color: #b3b3b3; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; }
+
+#playerBar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #181818;
+  border-top: 1px solid #333;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 10;
+}
+#playerBar.hidden { display: none; }
+
+#playerWrap { width: 350px; max-width: 45vw; }
+#playerWrap iframe {
+  width: 100%;
+  height: 152px;
+  border: 0;
+  border-radius: 10px;
+}
+
+#playerInfo { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 0; }
+#nowPlaying { flex: 1; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#closePlayer {
+  background: none; border: none; color: #b3b3b3;
+  font-size: 22px; cursor: pointer; flex-shrink: 0;
+}
+#closePlayer:hover { color: #fff; }
+
+body { padding-bottom: 200px; }
