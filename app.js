@@ -1,4 +1,4 @@
-const grid = document.getElementById('grid');
+﻿const grid = document.getElementById('grid');
 const search = document.getElementById('search');
 const sourceFilter = document.getElementById('sourceFilter');
 const counter = document.getElementById('counter');
@@ -46,7 +46,7 @@ function visible() {
 
 function render() {
   const list = visible();
-  counter.textContent = `Показано: ${list.length} из ${tracks.length}`;
+  counter.textContent = `РџРѕРєР°Р·Р°РЅРѕ: ${list.length} РёР· ${tracks.length}`;
   cardCount.textContent = `${tracks.length}`;
   grid.innerHTML = '';
   list.forEach(t => grid.appendChild(makeCard(t)));
@@ -71,7 +71,7 @@ function makeCard(t) {
   imgWrap.appendChild(coverEl(t));
   const playBadge = document.createElement('div');
   playBadge.className = 'playBadge';
-  playBadge.textContent = '▶';
+  playBadge.textContent = 'в–¶';
   imgWrap.appendChild(playBadge);
 
   const name = document.createElement('div');
@@ -118,10 +118,10 @@ function playTrack() {
   nowTitle.title = t.name;
   nowArtist.title = t.artists;
   playing = true;
-  btnPlay.textContent = '❚❚';
+  btnPlay.textContent = 'вќљвќљ';
   highlightCard();
   stopAuto();
-  autoTimer = setTimeout(stepNext, 32000);
+  autoTimer = setTimeout(stepNext, 28000);
 }
 
 function stepNext() {
@@ -146,19 +146,19 @@ function togglePlay() {
   if (!queue.length) return;
   if (playing) {
     playing = false;
-    btnPlay.textContent = '▶';
+    btnPlay.textContent = 'в–¶';
     if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
   } else {
     playing = true;
-    btnPlay.textContent = '❚❚';
-    autoTimer = setTimeout(stepNext, 32000);
+    btnPlay.textContent = 'вќљвќљ';
+    autoTimer = setTimeout(stepNext, 28000);
   }
   const t = current();
   if (t) openEmbedLazy();
 }
 
 function openEmbedLazy() {
-  // При паузе/возобновлении перезагружаем embed, чтобы он начал из-за autoplay (иначе не переиграет)
+  // РџСЂРё РїР°СѓР·Рµ/РІРѕР·РѕР±РЅРѕРІР»РµРЅРёРё РїРµСЂРµР·Р°РіСЂСѓР¶Р°РµРј embed, С‡С‚РѕР±С‹ РѕРЅ РЅР°С‡Р°Р» РёР·-Р·Р° autoplay (РёРЅР°С‡Рµ РЅРµ РїРµСЂРµРёРіСЂР°РµС‚)
   const iframe = playerWrap.querySelector('iframe');
   if (iframe) {
     iframe.src = iframe.src.split('&autoplay')[0] + (playing ? '&autoplay=1' : '');
