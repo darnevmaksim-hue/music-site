@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Моя библиотека</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Моя музыкальная библиотека</h1>
+    <div class="controls">
+      <input type="search" id="search" placeholder="Поиск по названию, исполнителю, альбому...">
+      <select id="sourceFilter">
+        <option value="">Все плейлисты</option>
+      </select>
+    </div>
+    <p id="counter"></p>
+  </header>
+
+  <main id="grid"></main>
+
+  <div id="playerBar" class="hidden">
+    <div id="playerWrap"></div>
+    <div id="playerInfo">
+      <span id="nowPlaying"></span>
+      <button id="closePlayer">✕</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
